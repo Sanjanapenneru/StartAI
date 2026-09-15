@@ -1,14 +1,13 @@
+import os
+
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import declarative_base, sessionmaker
 
-DATABASE_URL = "postgresql://neondb_owner:npg_9NGcDWur6qtd@ep-hidden-waterfall-aqwep9rq.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require"
+# PostgreSQL is used when DATABASE_URL is configured. SQLite keeps the SIH
+# demo runnable locally without embedding credentials in source code.
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./gramai_demo.db")
 
-engine = create_engine(DATABASE_URL)
-
-SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine
-)
-
+connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+engine = create_engine(DATABASE_URL, pool_pre_ping=True, connect_args=connect_args)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
