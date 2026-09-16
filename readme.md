@@ -1,231 +1,149 @@
-# Start AI — Build smarter from day one.
+# GRAMAI
 
-> An AI-powered multi-agent platform that helps founders create and optimize startups using coordinated agent workflows, LangGraph orchestration, and persistent organizational memory.
+**GRAMAI – AI-Powered Hyper-Local Business Advisor & Smart Scheme Calculator**
 
-![Stack](https://img.shields.io/badge/stack-FastAPI%20%7C%20React%20%7C%20LangGraph-informational)
+> Plan your business before you borrow.
 
----
+GRAMAI transforms the existing StartAI multi-agent foundation into a Smart India
+Hackathon 2026 prototype for rural and semi-urban entrepreneurs. A user enters
+their location, margin capital, and business category. GRAMAI returns a
+prototype market brief, feasibility score, deterministic financing plan, scheme
+recommendation, repayment information, risks, and next steps.
 
-## Overview
+## What is implemented
 
-Start AI is an organizational intelligence system for startups. It coordinates multiple specialized AI agents to deliver technical, financial, hiring, and marketing insights — either from scratch or by analyzing existing startup documents.
+- Entrepreneur assessment for village, block, district, state, capital, and business category.
+- LangGraph pipeline:
+  - Market Intelligence Agent
+  - Business Feasibility Agent
+  - Competitor & Opportunity Agent
+  - Finance Agent
+  - Scheme Recommendation Agent
+- Deterministic finance and scheme rules; Gemini cannot override them.
+- Quarterly repayment schedule and clearly labelled **Illustrative Monthly EMI**.
+- Prototype market dataset with transparent estimate labels.
+- Gemini integration with deterministic **Prototype Demo Mode** fallback.
+- React flow from landing page → assessment → analysis → financial planner → final recommendation.
+- Print-friendly final report.
+- English UI with Telugu and Hindi selector scaffolding.
+- Optional browser speech input when supported.
 
-**Core capabilities:**
+## Financial rules
 
-- Create a startup from a name, domain, and description
-- Optimize an existing startup by uploading pitch decks or reports
-- Generate recommendations across architecture, finance, hiring, and marketing
-- Maintain persistent startup organizational memory across sessions
+| Rule | Micro Finance Scheme | Term Loan |
+|---|---:|---:|
+| Project cost | Up to ₹1,40,000 | More than ₹1,40,000 and up to ₹50,00,000 |
+| Maximum loan | ₹1,25,000 | ₹45,00,000 |
+| Interest | 6.5% p.a. | 8% p.a. |
+| Repayment | 3 years | 7 years |
+| Moratorium | 3 months | 6 months |
 
----
+The backend calculates:
 
-## AI Agents
-
-| Agent | Responsibility |
-|---|---|
-| **CTO Agent** | Architecture design and scalability analysis |
-| **Finance Agent** | Burn rate modeling and financial optimization |
-| **Hiring Agent** | Team planning and talent acquisition strategy |
-| **Marketing Agent** | GTM strategy and growth recommendations |
-
-All agents collaboratively reason over a shared startup context using LangChain + LangGraph orchestration.
-
----
-
-## System Architecture
-
-```
-User
- └─▶ Firebase Authentication
-       └─▶ FastAPI Backend (JWT Verification)
-             ├─▶ [Workflow A] Create Startup
-             │     └─▶ Name + Domain + Description
-             └─▶ [Workflow B] Optimize Startup
-                   └─▶ PDF Upload → Context Extraction
-                         │
-                         ▼
-               LangChain + LangGraph Orchestration
-                         │
-               ┌──────────────────────┐
-               │  CTO · Finance       │
-               │  Hiring · Marketing  │
-               └──────────────────────┘
-                         │
-               Shared Organizational Reasoning
-                         │
-               Startup Workspace Memory
-                         │
-               PostgreSQL Database
+```text
+Project cost = available margin capital / 0.10
+Calculated financing = project cost × 0.90
+Supported loan = min(calculated financing, scheme maximum)
 ```
 
----
+Projects above ₹50,00,000 are not assigned an unsupported scheme.
 
-## Workflows
+## Architecture
 
-### 1. Create a Startup
-
-**Input:** Startup name, domain, and description
-
-**Output:**
-- Technical architecture strategy
-- Financial planning recommendations
-- Hiring roadmap
-- Marketing and GTM insights
-
-### 2. Optimize a Startup
-
-**Input:** PDF documents — pitch decks, startup reports, or architecture docs
-
-**Output:**
-- Extracted startup context
-- Structured organizational memory
-- Strategic recommendations from all four agents
-
----
-
-## Tech Stack
-
-### Frontend
-- React + Vite
-- TailwindCSS
-- Firebase Authentication
-
-### Backend
-- FastAPI
-- LangChain + LangGraph
-- SQLAlchemy
-- PostgreSQL
-
-### AI / LLM
-- Gemini
-
-### Infrastructure
-- Docker + Docker Compose
-- Frontend deployed on **Vercel**
-- Backend deployed on **Render**
-
----
-
-## Authentication
-
-The platform uses Firebase Authentication with the following features:
-
-- Google Login
-- Email / Password Authentication
-- JWT Token Verification
-- Protected Routes
-- User-Specific Workspaces
-
-**Flow:**
-
-1. User authenticates via Firebase
-2. Frontend sends JWT token to FastAPI backend
-3. Backend verifies token using Firebase Admin SDK
-4. Workspace ownership is linked to the authenticated user
-
----
-
-## Database Schema
-
-Each startup workspace stores:
-
-| Field | Description |
-|---|---|
-| `id` | Unique workspace identifier |
-| `startup_name` | Name of the startup |
-| `mode` | Workflow mode (create / optimize) |
-| `domain` | Startup domain |
-| `startup_description` | Description provided by the founder |
-| `startup_state` | Current AI-generated organizational state |
-| `user_uid` | Firebase user UID |
-| `user_email` | Authenticated user email |
-| `user_name` | Authenticated user display name |
-| `created_at` | Workspace creation timestamp |
-
----
-
-## Project Structure
-
-```
-backend/
-├── agents/           # CTO, Finance, Hiring, Marketing agents
-├── orchestrator/     # LangGraph workflow orchestration
-├── memory/           # Persistent startup memory layer
-├── models/           # SQLAlchemy database models
-├── services/         # Business logic and utilities
-├── uploads/          # PDF upload handling
-├── main.py
-└── requirements.txt
-
-frontend/
-├── components/       # Reusable UI components
-├── pages/            # Route-level page components
-├── context/          # React context providers
-├── services/         # API service layer
-├── firebase.js       # Firebase configuration
-└── App.jsx
+```text
+React + Vite
+  ↓
+FastAPI /api endpoints
+  ↓
+LangGraph EntrepreneurContext
+  ├─ Market Intelligence
+  ├─ Business Feasibility
+  ├─ Competitor & Opportunity
+  ├─ Deterministic Finance
+  └─ Deterministic Scheme Recommendation
+  ↓
+SQLAlchemy + PostgreSQL (or local SQLite demo fallback)
 ```
 
----
+## Environment variables
 
-## Docker Architecture
-
-The application is fully containerized using Docker and Docker Compose.
-
-| Container | Service |
-|---|---|
-| Frontend Container | React + Vite app |
-| Backend Container | FastAPI server |
-| PostgreSQL Container | Persistent database |
-
----
-
-## Getting Started
-
-### Prerequisites
-
-- Docker and Docker Compose installed
-
-### Run Locally
+Copy the templates:
 
 ```bash
-docker compose up --build
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
 ```
 
-### Local Endpoints
+Backend:
 
-| Service | URL |
-|---|---|
-| Frontend | http://localhost:5173 |
-| Backend | http://localhost:8007 |
-| Swagger API Docs | http://localhost:8007/docs |
+- `DATABASE_URL` — PostgreSQL connection string. If omitted, local demo mode uses `gramai_demo.db`.
+- `GEMINI_API_KEY` — optional. Missing or failed Gemini automatically uses Prototype Demo Mode.
+- `GEMINI_MODEL` — optional Gemini model name.
+- `FIREBASE_SERVICE_ACCOUNT_JSON` or `FIREBASE_SERVICE_ACCOUNT_PATH` — optional for authenticated legacy routes.
 
----
+Frontend:
 
-## Deployment
+- `VITE_API_BASE_URL`
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_STORAGE_BUCKET`
+- `VITE_FIREBASE_MESSAGING_SENDER_ID`
+- `VITE_FIREBASE_APP_ID`
+- `VITE_FIREBASE_MEASUREMENT_ID`
 
-| Service | Platform |
-|---|---|
-| Frontend | Vercel |
-| Backend | Render |
-| Database | PostgreSQL |
+No credentials belong in source control. The original public StartAI repository
+contained a database credential in source history; rotate that credential in
+the database provider and use a replacement value only through environment
+variables.
 
----
+## Run locally or in Replit
 
-## Feature Summary
+### Backend
 
-- Multi-agent AI orchestration via LangGraph
-- Startup creation workflow
-- Startup optimization workflow with PDF intelligence pipeline
-- Firebase Authentication with user-specific workspaces
-- Persistent organizational memory
-- Fully Dockerized architecture
-- PostgreSQL persistence
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn main:app --reload --host 0.0.0.0 --port 8007
+```
 
----
+Health check:
 
-## Author
+```bash
+curl http://localhost:8007/api/health
+```
 
-**Akula Lakshmi Venkata Sahith**
+### Frontend
 
-Website: [sahithakula.space](https://sahithakula.space)
+```bash
+cd frontend
+npm install
+npm run dev -- --host 0.0.0.0
+```
+
+Set `VITE_API_BASE_URL` to the backend URL used by the frontend.
+
+## API
+
+- `GET /api/health`
+- `POST /api/assessment`
+- `POST /api/analyze`
+- `POST /api/financial-plan`
+- `POST /api/recommend-scheme`
+- `GET /api/assessment/{id}`
+
+The GRAMAI assessment endpoints permit unauthenticated demo requests when
+Firebase is not configured. Supplied Firebase bearer tokens are still verified;
+production deployments should configure authentication and protect the routes
+according to their deployment policy.
+
+## Required demo checks
+
+- ₹10,000 capital → ₹1,00,000 project cost → ₹90,000 supported financing → Micro Finance Scheme.
+- ₹1,00,000 capital → ₹10,00,000 project cost → ₹9,00,000 supported financing → Term Loan.
+- Project cost above ₹50,00,000 → no supported scheme recommendation.
+
+All market insights in this prototype are seeded demo data or AI-generated
+estimates. They are not official government statistics or live competitor data.
