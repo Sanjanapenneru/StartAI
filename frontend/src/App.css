@@ -1,1 +1,13 @@
-/* App.css cleared for TailwindCSS v4 grid orchestration */
+@media print {
+  header,
+  footer,
+  button,
+  a {
+    display: none !important;
+  }
+
+  body,
+  #root {
+    background: white !important;
+  }
+}
